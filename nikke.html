@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nike, Inc. — Маркетинговый анализ</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f5f0;
+    --orange: #ff5500;
+    --gray: #1a1a1a;
+    --gray2: #2a2a2a;
+    --gray-text: #888;
+    --border: rgba(255,85,0,0.3);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; font-weight: 400; overflow-x: hidden; cursor: none; }
+
+  #cursor { position: fixed; width: 12px; height: 12px; background: var(--orange); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .2s, height .2s; mix-blend-mode: difference; }
+  #cursor-ring { position: fixed; width: 36px; height: 36px; border: 1.5px solid var(--orange); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: left .12s ease-out, top .12s ease-out; opacity: .6; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 18px 48px; backdrop-filter: blur(20px); background: rgba(10,10,10,.8); border-bottom: 1px solid rgba(255,85,0,.1); }
+  .nav-logo { font-family:'Bebas Neue'; font-size: 28px; letter-spacing: 4px; }
+  .nav-logo span { color: var(--orange); }
+  .nav-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  .nav-links a { color: var(--gray-text); text-decoration: none; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: color .2s; }
+  .nav-links a:hover { color: var(--orange); }
+
+  /* PHOTO UPLOAD SYSTEM */
+  .photo-slot { position: relative; overflow: hidden; }
+  .photo-slot img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease, filter .4s ease; }
+  .photo-slot:hover img { transform: scale(1.05); }
+  .upload-btn {
+    position: absolute; bottom: 12px; right: 12px;
+    background: rgba(255,85,0,0.9); color: #000;
+    font-size: 10px; font-weight: 900; letter-spacing: 2px;
+    padding: 7px 12px; border: none; cursor: pointer;
+    text-transform: uppercase; z-index: 10;
+    transition: background .2s; backdrop-filter: blur(4px);
+    border-radius: 2px;
+  }
+  .upload-btn:hover { background: var(--orange); }
+  .upload-input { display: none; }
+  .photo-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1a1a1a, #111);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 2px dashed rgba(255,85,0,0.3);
+    min-height: 200px;
+  }
+  .photo-placeholder .ph-icon { font-size: 40px; opacity: .3; margin-bottom: 8px; }
+  .photo-placeholder .ph-text { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); opacity: .6; text-align: center; padding: 0 16px; }
+
+  /* HERO */
+  #hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 120px 48px 60px; }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,85,0,.08) 0%, transparent 70%); }
+  .swoosh-bg { position: absolute; right: -5%; top: 50%; transform: translateY(-50%); font-size: 55vw; line-height: 1; color: rgba(255,255,255,.02); font-family:'Bebas Neue'; user-select: none; pointer-events: none; }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+  .hero-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--orange); margin-bottom: 20px; opacity: 0; animation: fadeUp .8s .2s forwards; }
+  .hero-title { font-family:'Bebas Neue'; font-size: clamp(72px,12vw,160px); line-height: .9; opacity: 0; animation: fadeUp .8s .4s forwards; }
+  .hero-title .line2 { color: var(--orange); display: block; }
+  .hero-sub { margin-top: 32px; font-size: 16px; font-weight: 300; color: var(--gray-text); max-width: 520px; line-height: 1.7; opacity: 0; animation: fadeUp .8s .6s forwards; }
+  .hero-stats { display: flex; gap: 48px; margin-top: 56px; opacity: 0; animation: fadeUp .8s .8s forwards; flex-wrap: wrap; }
+  .stat-item { border-left: 2px solid var(--orange); padding-left: 16px; }
+  .stat-num { font-family:'Bebas Neue'; font-size: 42px; color: var(--white); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--gray-text); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  .scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; animation: fadeUp 1s 1.2s forwards; }
+  .scroll-hint span { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gray-text); }
+  .scroll-line { width: 1px; height: 50px; background: linear-gradient(to bottom, var(--orange), transparent); animation: scrollLine 1.5s ease-in-out infinite; }
+  @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top;} 50%{transform:scaleY(1);transform-origin:top;} 51%{transform:scaleY(1);transform-origin:bottom;} 100%{transform:scaleY(0);transform-origin:bottom;} }
+
+  section { padding: 100px 48px; max-width: 1400px; margin: 0 auto; }
+  .section-header { margin-bottom: 60px; }
+  .section-number { font-family:'Bebas Neue'; font-size: 13px; letter-spacing: 4px; color: var(--orange); margin-bottom: 12px; }
+  .section-title { font-family:'Bebas Neue'; font-size: clamp(40px,6vw,72px); line-height: .95; }
+  .section-title em { color: var(--orange); font-style: normal; }
+  .section-desc { margin-top: 16px; font-size: 15px; color: var(--gray-text); max-width: 600px; line-height: 1.7; font-weight: 300; }
+  .divider { width: 100%; height: 1px; background: linear-gradient(to right, transparent, var(--orange), transparent); opacity: .3; }
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* NEWS TICKER */
+  .news-ticker-wrap { background: var(--orange); overflow: hidden; padding: 10px 0; }
+  .news-ticker { display: flex; gap: 60px; animation: ticker 30s linear infinite; white-space: nowrap; }
+  .news-ticker span { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--black); }
+  .news-ticker span::before { content: '▶ '; opacity: .5; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* PHOTO PROOF GRIDS */
+  .photo-proof { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; margin-top: 48px; }
+  .photo-proof.cols2 { grid-template-columns: repeat(2,1fr); }
+  .photo-card { position: relative; overflow: hidden; aspect-ratio: 4/3; }
+  .photo-card.tall { aspect-ratio: 3/4; }
+  .photo-card.wide { grid-column: span 2; aspect-ratio: 16/7; }
+  .photo-card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(30%) contrast(1.1); transition: transform .6s ease, filter .4s ease; }
+  .photo-card:hover img { transform: scale(1.05); filter: grayscale(0%) contrast(1.05); }
+  .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 60%); pointer-events: none; }
+  .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; pointer-events: none; }
+  .photo-caption .source { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+  .photo-caption .desc { font-size: 13px; font-weight: 600; color: var(--white); line-height: 1.3; }
+
+  /* COMPANY */
+  .company-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .company-item { background: var(--gray); padding: 28px 32px; border: 1px solid rgba(255,255,255,.04); transition: background .2s, border-color .2s; }
+  .company-item:hover { background: rgba(255,85,0,.05); border-color: rgba(255,85,0,.2); }
+  .company-item .label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 8px; }
+  .company-item .value { font-size: 16px; font-weight: 600; line-height: 1.4; }
+  .company-item.wide { grid-column: span 2; }
+  .mission-box { background: linear-gradient(135deg,rgba(255,85,0,.1),rgba(255,85,0,.03)); border: 1px solid var(--border); padding: 40px; margin-top: 2px; }
+  .mission-box .quote-mark { font-family:'Bebas Neue'; font-size: 80px; color: var(--orange); line-height: .7; opacity: .4; margin-bottom: 16px; }
+  .mission-text { font-size: 22px; font-weight: 300; line-height: 1.6; font-style: italic; }
+
+  /* FOUNDERS */
+  .founders-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 40px; }
+  .founder-block { position: relative; overflow: hidden; aspect-ratio: 3/4; }
+  .founder-block img { width: 100%; height: 100%; object-fit: cover; object-position: top; filter: grayscale(20%); transition: transform .5s; }
+  .founder-block:hover img { transform: scale(1.03); }
+  .founder-info { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,.9), transparent); padding: 24px; pointer-events: none; }
+  .founder-name { font-family:'Bebas Neue'; font-size: 28px; letter-spacing: 2px; color: var(--orange); }
+  .founder-role { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 40px; }
+  .timeline::before { content:''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--orange), transparent); }
+  .timeline-item { position: relative; padding: 24px 0 24px 32px; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .timeline-item::before { content:''; position: absolute; left: -5px; top: 32px; width: 12px; height: 12px; border-radius: 50%; background: var(--black); border: 2px solid var(--orange); transition: background .2s; }
+  .timeline-item:hover::before { background: var(--orange); }
+  .timeline-year { font-family:'Bebas Neue'; font-size: 13px; letter-spacing: 3px; color: var(--orange); margin-bottom: 6px; }
+  .timeline-text { font-size: 15px; font-weight: 300; line-height: 1.6; }
+
+  /* FINANCIALS */
+  .fin-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
+  .fin-card { background: var(--gray); padding: 32px 28px; border: 1px solid rgba(255,255,255,.04); transition: border-color .2s; }
+  .fin-card:hover { border-color: var(--border); }
+  .fin-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-text); margin-bottom: 12px; }
+  .fin-value { font-family:'Bebas Neue'; font-size: 42px; color: var(--orange); line-height: 1; }
+  .fin-unit { font-size: 13px; color: var(--gray-text); margin-top: 4px; }
+
+  /* REVENUE CHART */
+  .rev-chart { margin-top: 48px; }
+  .rev-chart-title { font-family:'Bebas Neue'; font-size: 18px; letter-spacing: 3px; color: var(--orange); margin-bottom: 24px; }
+  .rev-bars { display: flex; align-items: flex-end; gap: 12px; height: 200px; }
+  .rev-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .rev-bar { width: 100%; border-radius: 2px 2px 0 0; transition: height 1.2s ease; height: 0; }
+  .rev-year { font-size: 11px; color: var(--gray-text); letter-spacing: 1px; }
+  .rev-val { font-family:'Bebas Neue'; font-size: 14px; color: var(--orange); }
+
+  /* MARKET */
+  .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .donut-wrap { position: relative; width: 280px; height: 280px; margin: auto; }
+  .donut-wrap svg { transform: rotate(-90deg); }
+  .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .donut-center .big { font-family:'Bebas Neue'; font-size: 52px; color: var(--orange); line-height: 1; }
+  .donut-center .small { font-size: 12px; color: var(--gray-text); letter-spacing: 2px; text-transform: uppercase; }
+  .legend-list { display: flex; flex-direction: column; gap: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 16px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-info { flex: 1; }
+  .legend-name { font-size: 14px; font-weight: 600; }
+  .legend-bar-wrap { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; margin-top: 6px; }
+  .legend-bar { height: 100%; border-radius: 2px; }
+  .legend-pct { font-family:'Bebas Neue'; font-size: 22px; }
+
+  /* HHI */
+  .hhi-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .hhi-num-big { font-family:'Bebas Neue'; font-size: 120px; line-height: .9; color: var(--orange); }
+  .hhi-desc { font-size: 15px; font-weight: 300; line-height: 1.7; color: #ccc; margin-top: 20px; }
+  .competitor-bars { display: flex; flex-direction: column; gap: 12px; }
+  .comp-row { display: grid; grid-template-columns: 120px 1fr 50px; gap: 12px; align-items: center; }
+  .comp-name { font-size: 13px; font-weight: 600; }
+  .comp-bar-wrap { height: 24px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
+  .comp-bar { height: 100%; border-radius: 2px; display: flex; align-items: center; padding-left: 10px; }
+  .comp-pct { font-family:'Bebas Neue'; font-size: 18px; text-align: right; }
+
+  /* SWOT */
+  .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .swot-cell { padding: 36px; min-height: 240px; position: relative; overflow: hidden; transition: transform .2s; }
+  .swot-cell:hover { transform: scale(1.01); z-index: 2; }
+  .swot-cell.s { background: rgba(255,85,0,.12); }
+  .swot-cell.w { background: rgba(255,255,255,.04); }
+  .swot-cell.o { background: rgba(255,200,0,.06); }
+  .swot-cell.t { background: rgba(255,50,50,.07); }
+  .swot-letter { position: absolute; right: 20px; top: 10px; font-family:'Bebas Neue'; font-size: 80px; opacity: .08; line-height: 1; }
+  .swot-title { font-family:'Bebas Neue'; font-size: 24px; letter-spacing: 2px; margin-bottom: 20px; }
+  .swot-cell.s .swot-title { color: var(--orange); }
+  .swot-cell.w .swot-title { color: #aaa; }
+  .swot-cell.o .swot-title { color: #ffc107; }
+  .swot-cell.t .swot-title { color: #ff5252; }
+  .swot-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .swot-list li { font-size: 14px; font-weight: 300; line-height: 1.5; padding-left: 16px; position: relative; }
+  .swot-list li::before { content:'—'; position: absolute; left: 0; color: var(--orange); font-weight: 700; }
+  .swot-cell.w .swot-list li::before { color: #666; }
+  .swot-cell.o .swot-list li::before { color: #ffc107; }
+  .swot-cell.t .swot-list li::before { color: #ff5252; }
+
+  /* SEGMENTS */
+  .segments-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; }
+  .segment-card { background: var(--gray); padding: 40px 32px; border: 1px solid rgba(255,255,255,.04); position: relative; overflow: hidden; transition: border-color .3s, transform .3s; }
+  .segment-card:hover { border-color: rgba(255,85,0,.4); transform: translateY(-4px); }
+  .segment-card::before { content:''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+  .segment-card:hover::before { transform: scaleX(1); }
+  .seg-num { font-family:'Bebas Neue'; font-size: 60px; color: rgba(255,85,0,.12); line-height: 1; margin-bottom: 16px; }
+  .seg-title { font-family:'Barlow Condensed'; font-size: 22px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+  .seg-desc { font-size: 14px; font-weight: 300; color: var(--gray-text); line-height: 1.7; margin-bottom: 24px; }
+  .seg-ltv { border-top: 1px solid rgba(255,255,255,.07); padding-top: 20px; }
+  .seg-ltv .ltv-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
+  .seg-ltv .ltv-value { font-family:'Bebas Neue'; font-size: 36px; }
+
+  /* SEGMENTATION PROCESS (NEW) */
+  .seg-process-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-top: 48px; }
+  .seg-step { background: var(--gray); padding: 32px; border: 1px solid rgba(255,255,255,.04); position: relative; transition: border-color .3s; }
+  .seg-step:hover { border-color: rgba(255,85,0,.4); }
+  .seg-step-num { font-family:'Bebas Neue'; font-size: 72px; color: rgba(255,85,0,.1); line-height: .8; margin-bottom: 16px; }
+  .seg-step-title { font-family:'Bebas Neue'; font-size: 18px; letter-spacing: 2px; color: var(--orange); margin-bottom: 12px; }
+  .seg-step-text { font-size: 13px; font-weight: 300; color: #ccc; line-height: 1.7; }
+  .seg-step-badge { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,85,0,.15); border: 1px solid var(--orange); display: flex; align-items: center; justify-content: center; font-family:'Bebas Neue'; font-size: 16px; color: var(--orange); }
+
+  .principles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-top: 32px; }
+  .principle-card { background: rgba(255,85,0,.05); border: 1px solid rgba(255,85,0,.15); padding: 24px; transition: background .2s; }
+  .principle-card:hover { background: rgba(255,85,0,.1); }
+  .principle-num { font-family:'Bebas Neue'; font-size: 11px; letter-spacing: 3px; color: rgba(255,85,0,.5); margin-bottom: 8px; }
+  .principle-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .principle-desc { font-size: 13px; font-weight: 300; color: var(--gray-text); line-height: 1.6; }
+
+  .methods-list { display: flex; flex-direction: column; gap: 3px; margin-top: 32px; }
+  .method-row { display: grid; grid-template-columns: 200px 1fr; gap: 0; }
+  .method-label { background: rgba(255,85,0,.12); border: 1px solid rgba(255,85,0,.2); padding: 20px 24px; display: flex; align-items: center; }
+  .method-label-text { font-family:'Bebas Neue'; font-size: 16px; letter-spacing: 2px; color: var(--orange); }
+  .method-content { background: var(--gray); border: 1px solid rgba(255,255,255,.04); padding: 20px 24px; }
+  .method-content-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .method-content-text { font-size: 13px; font-weight: 300; color: var(--gray-text); line-height: 1.6; }
+
+  .seg-model-table { width: 100%; border-collapse: collapse; margin-top: 40px; }
+  .seg-model-table th { background: rgba(255,85,0,.15); border: 1px solid rgba(255,85,0,.2); padding: 14px 20px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); text-align: left; font-weight: 700; }
+  .seg-model-table td { background: var(--gray); border: 1px solid rgba(255,255,255,.05); padding: 14px 20px; font-size: 13px; font-weight: 300; color: #ccc; line-height: 1.5; vertical-align: top; }
+  .seg-model-table tr:hover td { background: rgba(255,85,0,.04); }
+  .benefit-table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+  .benefit-table th { background: rgba(255,85,0,.1); border: 1px solid rgba(255,85,0,.2); padding: 12px 16px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); text-align: left; }
+  .benefit-table td { background: var(--gray); border: 1px solid rgba(255,255,255,.05); padding: 12px 16px; font-size: 13px; color: #ccc; }
+
+  /* 4P */
+  .fourp-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 2px; }
+  .fourp-card { background: var(--gray); padding: 40px; border: 1px solid rgba(255,255,255,.04); transition: background .3s; }
+  .fourp-card:hover { background: rgba(255,85,0,.06); }
+  .fourp-letter { font-family:'Bebas Neue'; font-size: 100px; line-height: .8; color: rgba(255,85,0,.1); margin-bottom: 8px; transition: color .3s; }
+  .fourp-card:hover .fourp-letter { color: rgba(255,85,0,.2); }
+  .fourp-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 12px; }
+  .fourp-text { font-size: 15px; font-weight: 300; line-height: 1.7; color: #ccc; }
+  .fourp-score { margin-top: 24px; display: flex; align-items: center; gap: 12px; }
+  .fourp-score .score-num { font-family:'Bebas Neue'; font-size: 40px; color: var(--orange); }
+  .fourp-score .score-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; }
+  .fourp-score .score-bar { height: 100%; background: var(--orange); border-radius: 2px; }
+
+  /* ABC */
+  .abc-bars { display: flex; flex-direction: column; gap: 3px; }
+  .abc-row { display: grid; grid-template-columns: 160px 1fr 100px 60px; gap: 16px; align-items: center; }
+  .abc-product { font-size: 13px; font-weight: 600; }
+  .abc-bar-wrap { height: 28px; background: rgba(255,255,255,.04); border-radius: 2px; overflow: hidden; }
+  .abc-bar { height: 100%; display: flex; align-items: center; padding-left: 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+  .abc-bar.grp-a { background: linear-gradient(90deg, var(--orange), rgba(255,85,0,.5)); color: var(--black); }
+  .abc-bar.grp-b { background: rgba(255,255,255,.2); color: var(--white); }
+  .abc-bar.grp-c { background: rgba(255,255,255,.08); color: var(--gray-text); }
+  .abc-revenue { font-family:'Bebas Neue'; font-size: 16px; text-align: right; }
+  .abc-group-badge { font-size: 11px; font-weight: 900; letter-spacing: 2px; padding: 4px 8px; border-radius: 2px; text-align: center; }
+  .abc-group-badge.a { background: var(--orange); color: var(--black); }
+  .abc-group-badge.b { background: rgba(255,255,255,.15); }
+  .abc-group-badge.c { background: rgba(255,255,255,.05); color: var(--gray-text); }
+
+  /* PEST */
+  .pest-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 2px; }
+  .pest-card { background: var(--gray); padding: 36px; }
+  .pest-header { font-family:'Bebas Neue'; font-size: 20px; letter-spacing: 3px; color: var(--orange); margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .pest-factor { margin-bottom: 14px; }
+  .pest-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .pest-bar-wrap { height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; }
+  .pest-bar { height: 100%; border-radius: 2px; background: var(--orange); }
+  .pest-weight { font-size: 11px; color: var(--gray-text); margin-top: 3px; text-align: right; }
+
+  /* RADAR */
+  .radar-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .radar-legend { display: flex; flex-direction: column; gap: 20px; }
+  .radar-brand { display: flex; align-items: center; gap: 12px; }
+  .radar-dot { width: 14px; height: 14px; border-radius: 50%; }
+  .radar-brand-name { font-weight: 700; font-size: 15px; }
+  .radar-scores { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .radar-score-tag { font-size: 11px; padding: 3px 8px; border-radius: 2px; background: rgba(255,255,255,.06); color: var(--gray-text); }
+
+  /* ENDORSEMENTS */
+  .endorsement-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 3px; margin-top: 48px; }
+  .endorse-card { position: relative; overflow: hidden; aspect-ratio: 3/4; }
+  .endorse-card img { width: 100%; height: 100%; object-fit: cover; object-position: top; filter: grayscale(20%) contrast(1.1); transition: transform .6s, filter .4s; }
+  .endorse-card:hover img { transform: scale(1.04); filter: grayscale(0%); }
+  .endorse-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.2) 50%, transparent 100%); pointer-events: none; }
+  .endorse-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px; pointer-events: none; }
+  .endorse-name { font-family:'Bebas Neue'; font-size: 36px; letter-spacing: 2px; color: var(--white); line-height: 1; }
+  .endorse-detail { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-top: 4px; }
+  .endorse-contract { font-family:'Bebas Neue'; font-size: 22px; color: rgba(255,85,0,.7); margin-top: 8px; }
+  .endorse-badge { position: absolute; top: 16px; right: 16px; background: var(--orange); color: var(--black); font-size: 10px; font-weight: 900; letter-spacing: 2px; padding: 6px 10px; border-radius: 2px; text-transform: uppercase; pointer-events: none; }
+
+  /* NEWS CARDS */
+  .news-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 48px; }
+  .news-card { background: var(--gray); border: 1px solid rgba(255,255,255,.06); padding: 24px; position: relative; transition: border-color .2s, transform .2s; }
+  .news-card:hover { border-color: var(--border); transform: translateY(-3px); }
+  .news-source { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 10px; }
+  .news-headline { font-size: 15px; font-weight: 700; line-height: 1.4; margin-bottom: 10px; }
+  .news-body { font-size: 13px; font-weight: 300; color: var(--gray-text); line-height: 1.6; }
+  .news-date { font-size: 11px; color: #555; margin-top: 12px; letter-spacing: 1px; }
+  .news-card::before { content:''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--orange); transform: scaleX(0); transform-origin: left; transition: transform .3s; }
+  .news-card:hover::before { transform: scaleX(1); }
+
+  /* SUSTAINABILITY */
+  .sustain-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-top: 48px; }
+  .sustain-img { position: relative; overflow: hidden; aspect-ratio: 4/3; }
+  .sustain-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(20%); }
+  .sustain-stats { display: flex; flex-direction: column; gap: 24px; }
+  .sustain-stat { display: flex; align-items: center; gap: 20px; padding: 20px; background: var(--gray); border-left: 3px solid var(--orange); }
+  .sustain-num { font-family:'Bebas Neue'; font-size: 48px; color: var(--orange); line-height: 1; }
+  .sustain-text-wrap .sustain-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-text); }
+  .sustain-text-wrap .sustain-detail { font-size: 14px; font-weight: 300; color: #ccc; margin-top: 4px; }
+
+  /* CONCLUSION */
+  .conclusion-inner { text-align: center; max-width: 800px; margin: 0 auto; }
+  .conclusion-mark { font-family:'Bebas Neue'; font-size: 180px; color: var(--orange); line-height: .8; opacity: .08; animation: pulse 3s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.06;} 50%{opacity:.12;} }
+  .conclusion-headline { font-family:'Bebas Neue'; font-size: clamp(40px,7vw,80px); margin-top: -60px; position: relative; z-index: 2; }
+  .conclusion-text { font-size: 16px; font-weight: 300; line-height: 1.8; color: var(--gray-text); margin-top: 28px; }
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 40px; }
+  .tag { padding: 8px 18px; border: 1px solid rgba(255,85,0,.3); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); border-radius: 2px; transition: background .2s, color .2s; }
+  .tag:hover { background: var(--orange); color: var(--black); }
+
+  footer { background: var(--gray); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,.06); }
+  .footer-logo { font-family:'Bebas Neue'; font-size: 24px; letter-spacing: 4px; }
+  .footer-logo span { color: var(--orange); }
+  .footer-info { font-size: 12px; color: var(--gray-text); text-align: right; line-height: 1.7; }
+
+  /* PHOTO UPLOAD PANEL */
+  .upload-panel { background: rgba(255,85,0,.05); border: 1px solid rgba(255,85,0,.2); padding: 20px 24px; margin-top: 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .upload-panel-icon { font-size: 24px; }
+  .upload-panel-text { font-size: 13px; font-weight: 300; color: var(--gray-text); flex: 1; }
+  .upload-panel-text strong { color: var(--white); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 60px 24px; }
+    .company-grid,.fourp-grid,.segments-grid,.seg-process-steps,.principles-grid,.market-grid,.hhi-wrap,.radar-wrap,.swot-grid,.fin-grid,.pest-grid,.sustain-layout,.endorsement-grid,.news-grid,.photo-proof,.founders-layout,.methods-list .method-row { grid-template-columns: 1fr; }
+    .company-item.wide { grid-column: span 1; }
+    .photo-card.wide { grid-column: span 1; aspect-ratio: 4/3; }
+    .abc-row { grid-template-columns: 100px 1fr 80px 50px; }
+    .method-row { display: block; }
+    .method-label { border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NEWS TICKER -->
+<div class="news-ticker-wrap" style="position:fixed;top:0;left:0;right:0;z-index:200;">
+  <div class="news-ticker">
+    <span>Nike Q4 2024: выручка $51,4 млрд</span>
+    <span>Роналду — пожизненный контракт с Nike</span>
+    <span>Air Jordan — $7 млрд в год</span>
+    <span>Nike DTC доля растёт до 26%</span>
+    <span>Move to Zero: 79% переработанного полиэстера</span>
+    <span>HHI рынка = 2436 — высокая концентрация</span>
+    <span>Nike + Apple Watch — новая экосистема</span>
+    <span>Nike Q4 2024: выручка $51,4 млрд</span>
+    <span>Роналду — пожизненный контракт с Nike</span>
+    <span>Air Jordan — $7 млрд в год</span>
+    <span>Nike DTC доля растёт до 26%</span>
+    <span>Move to Zero: 79% переработанного полиэстера</span>
+    <span>HHI рынка = 2436 — высокая концентрация</span>
+    <span>Nike + Apple Watch — новая экосистема</span>
+  </div>
+</div>
+
+<nav style="top:36px;">
+  <div class="nav-logo">NIKE <span>INC</span></div>
+  <div class="nav-links">
+    <a href="#company">Компания</a>
+    <a href="#history">История</a>
+    <a href="#market">Рынок</a>
+    <a href="#swot">SWOT</a>
+    <a href="#segments">Сегменты</a>
+    <a href="#segprocess">Сегментация</a>
+    <a href="#endorsements">Амбассадоры</a>
+    <a href="#marketing4p">4P</a>
+    <a href="#abc">ABC</a>
+    <a href="#pest">PEST</a>
+    <a href="#sustainability">Устойчивость</a>
+    <a href="#conclusion">Вывод</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div id="hero" style="padding-top:160px;">
+  <div class="hero-bg"></div>
+  <div class="swoosh-bg">✓</div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Курсовая работа · Маркетинговый анализ · 2024/2025</div>
+    <h1 class="hero-title">NIKE<span class="line2">INC.</span></h1>
+    <p class="hero-sub">Комплексный маркетинговый анализ мирового лидера спортивной индустрии — от сегментации рынка до стратегического позиционирования.</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">$51,4<span style="font-size:24px">B</span></div><div class="stat-label">Выручка 2024</div></div>
+      <div class="stat-item"><div class="stat-num">27%</div><div class="stat-label">Доля рынка</div></div>
+      <div class="stat-item"><div class="stat-num">1971</div><div class="stat-label">Год основания</div></div>
+      <div class="stat-item"><div class="stat-num">4,5/5</div><div class="stat-label">Оценка 4P</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>scroll</span><div class="scroll-line"></div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 01 COMPANY -->
+<section id="company">
+  <div class="section-header reveal">
+    <div class="section-number">01 / ПРОФИЛЬ</div>
+    <h2 class="section-title">ВИЗИТНАЯ<br><em>КАРТОЧКА</em></h2>
+    <p class="section-desc">Nike, Inc. — крупнейший мировой производитель спортивной обуви, одежды и аксессуаров с долей рынка 27%.</p>
+  </div>
+
+  <div class="company-grid reveal">
+    <div class="company-item"><div class="label">Полное наименование</div><div class="value">Nike, Inc.</div></div>
+    <div class="company-item"><div class="label">Организационно-правовая форма</div><div class="value">Публичная корпорация (акционерное общество)</div></div>
+    <div class="company-item"><div class="label">Год основания</div><div class="value">1964 (Blue Ribbon Sports) → 1971 (Nike)</div></div>
+    <div class="company-item"><div class="label">Штаб-квартира</div><div class="value">Бивертон, Орегон, США</div></div>
+    <div class="company-item"><div class="label">Основатели</div><div class="value">Фил Найт & Билл Бауэрман</div></div>
+    <div class="company-item"><div class="label">Основные бренды</div><div class="value">Nike · Jordan Brand · Converse · Nike SB · Nike ACG</div></div>
+    <div class="company-item wide"><div class="label">Слоган</div><div class="value" style="font-family:'Bebas Neue';font-size:36px;letter-spacing:4px;color:var(--orange)">JUST DO IT.</div></div>
+  </div>
+
+  <div class="mission-box reveal">
+    <div class="quote-mark">"</div>
+    <div class="mission-text">Принести вдохновение и инновации каждому спортсмену в мире.<br>Если у вас есть тело — вы спортсмен.</div>
+  </div>
+
+  <!-- UPLOAD HINT PANEL -->
+  <div class="upload-panel reveal">
+    <div class="upload-panel-icon">📸</div>
+    <div class="upload-panel-text"><strong>Добавить фотографии:</strong> Каждый фото-блок ниже имеет кнопку <span style="background:var(--orange);color:#000;padding:2px 8px;font-size:11px;font-weight:700">+ ФОТО</span> — нажмите её, чтобы загрузить свою фотографию. Работает для всех блоков: основатели, штаб-квартира, амбассадоры и др.</div>
+  </div>
+
+  <!-- FOUNDERS PHOTOS -->
+  <div class="founders-layout reveal" style="margin-top:24px;">
+    <div class="founder-block photo-slot" id="slot-knight">
+      <img id="img-knight" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Phil_Knight_%28businessman%29.jpg/400px-Phil_Knight_%28businessman%29.jpg" alt="Фил Найт" onerror="this.style.display='none';document.getElementById('ph-knight').style.display='flex'">
+      <div id="ph-knight" class="photo-placeholder" style="display:none;position:absolute;inset:0;"><div class="ph-icon">👤</div><div class="ph-text">Фил Найт<br>Нажмите + ФОТО</div></div>
+      <div class="photo-overlay"></div>
+      <div class="founder-info">
+        <div class="founder-name">Фил Найт</div>
+        <div class="founder-role">Со-основатель & Председатель совета директоров</div>
+      </div>
+      <button class="upload-btn" onclick="triggerUpload('knight')">+ ФОТО</button>
+      <input class="upload-input" id="file-knight" type="file" accept="image/*" onchange="loadPhoto(this,'img-knight','ph-knight')">
+    </div>
+    <div class="founder-block photo-slot" id="slot-bowerman">
+      <img id="img-bowerman" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Bill_Bowerman.jpg/400px-Bill_Bowerman.jpg" alt="Билл Бауэрман" onerror="this.style.display='none';document.getElementById('ph-bowerman').style.display='flex'">
+      <div id="ph-bowerman" class="photo-placeholder" style="display:none;position:absolute;inset:0;"><div class="ph-icon">👤</div><div class="ph-text">Билл Бауэрман<br>Нажмите + ФОТО</div></div>
+      <div class="photo-overlay"></div>
+      <div class="founder-info">
+        <div class="founder-name">Билл Бауэрман</div>
+        <div class="founder-role">Со-основатель & Главный тренер · University of Oregon</div>
+      </div>
+      <button class="upload-btn" onclick="triggerUpload('bowerman')">+ ФОТО</button>
+      <input class="upload-input" id="file-bowerman" type="file" accept="image/*" onchange="loadPhoto(this,'img-bowerman','ph-bowerman')">
+    </div>
+  </div>
+
+  <!-- HQ PHOTO -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:3px;margin-top:3px;" class="reveal">
+    <div class="photo-slot" style="position:relative;aspect-ratio:16/7;overflow:hidden;">
+      <img id="img-hq" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Nike_Headquarters_Beaverton_Oregon.jpg/1200px-Nike_Headquarters_Beaverton_Oregon.jpg" alt="Nike HQ" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';document.getElementById('ph-hq').style.display='flex'">
+      <div id="ph-hq" class="photo-placeholder" style="display:none;position:absolute;inset:0;"><div class="ph-icon">🏢</div><div class="ph-text">Nike HQ<br>Нажмите + ФОТО</div></div>
+      <div class="photo-overlay"></div>
+      <div class="photo-caption"><div class="source">Официальная штаб-квартира</div><div class="desc">Nike World Campus, Бивертон, Орегон — 178 га инновационного кампуса</div></div>
+      <button class="upload-btn" onclick="triggerUpload('hq')">+ ФОТО</button>
+      <input class="upload-input" id="file-hq" type="file" accept="image/*" onchange="loadPhoto(this,'img-hq','ph-hq')">
+    </div>
+    <div class="photo-slot" style="position:relative;overflow:hidden;aspect-ratio:4/3;">
+      <img id="img-shoes1" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80" alt="Nike продукция" style="width:100%;height:100%;object-fit:cover;">
+      <div class="photo-overlay"></div>
+      <div class="photo-caption"><div class="source">Продукция Nike</div><div class="desc">Флагманская линейка — технологии Air и React</div></div>
+      <button class="upload-btn" onclick="triggerUpload('shoes1')">+ ФОТО</button>
+      <input class="upload-input" id="file-shoes1" type="file" accept="image/*" onchange="loadPhoto(this,'img-shoes1','')">
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 02 HISTORY -->
+<section id="history">
+  <div class="section-header reveal">
+    <div class="section-number">02 / ИСТОРИЯ</div>
+    <h2 class="section-title">ПУТЬ<br><em>К ВЕРШИНЕ</em></h2>
+  </div>
+  <div class="timeline reveal">
+    <div class="timeline-item">
+      <div class="timeline-year">1964</div>
+      <div class="timeline-text">Фил Найт и Билл Бауэрман основывают <strong style="color:var(--orange)">Blue Ribbon Sports</strong> как дистрибьютора Onitsuka Tiger.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1971</div>
+      <div class="timeline-text">Регистрация бренда Nike, создание знаменитого логотипа «Swoosh» студенткой Каролин Дэвидсон за $35.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1980</div>
+      <div class="timeline-text">IPO на фондовой бирже NYSE, старт активной международной экспансии. Рыночная капитализация достигла $178 млн.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1984</div>
+      <div class="timeline-text">Легендарный контракт с Майклом Джорданом → запуск линии <strong style="color:var(--orange)">Air Jordan</strong>. За первый год продажи составили $126 млн.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1988</div>
+      <div class="timeline-text">Появление слогана «<strong style="color:var(--orange)">Just Do It</strong>» — один из самых узнаваемых в истории маркетинга.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2016</div>
+      <div class="timeline-text">Криштиану Роналду подписывает <strong style="color:var(--orange)">пожизненный контракт</strong> с Nike ориентировочной стоимостью $1 млрд.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2010-е</div>
+      <div class="timeline-text">Цифровизация: Nike Run Club, Nike Training Club, запуск экосистемы приложений. 500+ млн загрузок.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2020-е</div>
+      <div class="timeline-text">Программа <strong style="color:var(--orange)">Move to Zero</strong>, метавселенная, NFT-платформа SWOOSH. Цель: нулевые выбросы углерода к 2050.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 03 FINANCIALS -->
+<section id="financials">
+  <div class="section-header reveal">
+    <div class="section-number">03 / ФИНАНСЫ</div>
+    <h2 class="section-title">ФИНАНСОВЫЕ<br><em>ПОКАЗАТЕЛИ 2024</em></h2>
+  </div>
+  <div class="fin-grid reveal">
+    <div class="fin-card"><div class="fin-label">Выручка</div><div class="fin-value">$51,4</div><div class="fin-unit">млрд USD · рост +1,5%</div></div>
+    <div class="fin-card"><div class="fin-label">Чистая прибыль</div><div class="fin-value">$5,7</div><div class="fin-unit">млрд USD</div></div>
+    <div class="fin-card"><div class="fin-label">Доля онлайн-продаж</div><div class="fin-value">26%</div><div class="fin-unit">от совокупного оборота</div></div>
+    <div class="fin-card"><div class="fin-label">Доля рынка</div><div class="fin-value">27%</div><div class="fin-unit">мировой рынок · лидер</div></div>
+  </div>
+
+  <div class="rev-chart reveal">
+    <div class="rev-chart-title">Динамика выручки 2019–2024 (млрд USD)</div>
+    <div class="rev-bars" id="revBars">
+      <div class="rev-bar-wrap"><div class="rev-val">$39,1</div><div class="rev-bar" id="rb1" style="background:rgba(255,85,0,0.4);" data-h="76"></div><div class="rev-year">2019</div></div>
+      <div class="rev-bar-wrap"><div class="rev-val">$37,4</div><div class="rev-bar" id="rb2" style="background:rgba(255,85,0,0.4);" data-h="73"></div><div class="rev-year">2020</div></div>
+      <div class="rev-bar-wrap"><div class="rev-val">$44,5</div><div class="rev-bar" id="rb3" style="background:rgba(255,85,0,0.55);" data-h="86"></div><div class="rev-year">2021</div></div>
+      <div class="rev-bar-wrap"><div class="rev-val">$46,7</div><div class="rev-bar" id="rb4" style="background:rgba(255,85,0,0.65);" data-h="91"></div><div class="rev-year">2022</div></div>
+      <div class="rev-bar-wrap"><div class="rev-val">$51,2</div><div class="rev-bar" id="rb5" style="background:rgba(255,85,0,0.8);" data-h="99"></div><div class="rev-year">2023</div></div>
+      <div class="rev-bar-wrap"><div class="rev-val" style="color:var(--orange)">$51,4</div><div class="rev-bar" id="rb6" style="background:var(--orange);" data-h="100"></div><div class="rev-year" style="color:var(--orange)">2024</div></div>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;" class="reveal">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">
+      <div style="background:rgba(255,85,0,0.15);padding:24px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:28px;color:var(--orange)">42%</div><div style="font-size:12px;color:var(--gray-text);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Северная Америка</div></div>
+      <div style="background:rgba(255,255,255,0.04);padding:24px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:28px;color:var(--white)">27%</div><div style="font-size:12px;color:var(--gray-text);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Европа, БВ, Африка</div></div>
+      <div style="background:rgba(255,255,255,0.04);padding:24px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:28px;color:var(--white)">15%</div><div style="font-size:12px;color:var(--gray-text);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Китай</div></div>
+      <div style="background:rgba(255,255,255,0.04);padding:24px;text-align:center;"><div style="font-family:'Bebas Neue';font-size:28px;color:var(--white)">16%</div><div style="font-size:12px;color:var(--gray-text);margin-top:4px;text-transform:uppercase;letter-spacing:1px">АТР и Лат. Америка</div></div>
+    </div>
+  </div>
+
+  <div class="news-grid reveal">
+    <div class="news-card">
+      <div class="news-source">Bloomberg · 2024</div>
+      <div class="news-headline">Nike Reports $51.4B Revenue for Fiscal 2024</div>
+      <div class="news-body">Nike's annual revenue reached $51.4 billion, maintaining its position as the world's largest athletic apparel brand. Digital sales grew to 26% of total revenue.</div>
+      <div class="news-date">27 июня 2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">Forbes · 2024</div>
+      <div class="news-headline">Nike Remains World's Most Valuable Apparel Brand at $30.4B</div>
+      <div class="news-body">For the 8th consecutive year Nike leads Interbrand's sportswear rankings. Brand value estimated at $30.4 billion globally.</div>
+      <div class="news-date">Октябрь 2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">Reuters · 2024</div>
+      <div class="news-headline">Nike Direct-to-Consumer Sales Strategy Paying Off</div>
+      <div class="news-body">Nike's DTC model continues driving higher margins. Online channel now represents 26% of total sales, up from 10% in 2019. NikePlus membership exceeds 160 million.</div>
+      <div class="news-date">Сентябрь 2024</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 04 MARKET -->
+<section id="market">
+  <div class="section-header reveal">
+    <div class="section-number">04 / РЫНОК</div>
+    <h2 class="section-title">ДОЛЯ<br><em>РЫНКА</em></h2>
+    <p class="section-desc">Мировой рынок спортивных товаров 2024: $420 млрд. Прогноз к 2030: $530 млрд. CAGR ≈ 4,5–5%</p>
+  </div>
+  <div class="market-grid reveal">
+    <div class="donut-wrap">
+      <svg viewBox="0 0 200 200" width="280" height="280">
+        <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="28"/>
+        <circle id="nike-arc" cx="100" cy="100" r="80" fill="none" stroke="#ff5500" stroke-width="28" stroke-dasharray="0 503"/>
+        <circle id="adidas-arc" cx="100" cy="100" r="80" fill="none" stroke="#aaa" stroke-width="28" stroke-dasharray="0 503"/>
+        <circle id="nb-arc" cx="100" cy="100" r="80" fill="none" stroke="#666" stroke-width="28" stroke-dasharray="0 503"/>
+        <circle id="puma-arc" cx="100" cy="100" r="80" fill="none" stroke="#444" stroke-width="28" stroke-dasharray="0 503"/>
+        <circle id="ua-arc" cx="100" cy="100" r="80" fill="none" stroke="#333" stroke-width="28" stroke-dasharray="0 503"/>
+      </svg>
+      <div class="donut-center"><div class="big">27%</div><div class="small">Nike</div></div>
+    </div>
+    <div class="legend-list">
+      <div class="legend-item"><div class="legend-dot" style="background:#ff5500"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">Nike</div><div class="legend-pct" style="color:#ff5500">27%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:27%;background:#ff5500"></div></div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#aaa"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">Adidas</div><div class="legend-pct" style="color:#aaa">19%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:19%;background:#aaa"></div></div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#888"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">New Balance</div><div class="legend-pct" style="color:#888">7%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:7%;background:#888"></div></div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#555"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">Puma</div><div class="legend-pct" style="color:#555">6%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:6%;background:#555"></div></div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#333;border:1px solid #444"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">Under Armour</div><div class="legend-pct" style="color:#555">6%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:6%;background:#333;border:1px solid #444"></div></div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#222;border:1px solid #444"></div><div class="legend-info"><div style="display:flex;justify-content:space-between"><div class="legend-name">Прочие</div><div class="legend-pct" style="color:#555">35%</div></div><div class="legend-bar-wrap"><div class="legend-bar" style="width:35%;background:#2a2a2a"></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 05 HHI -->
+<section id="hhi">
+  <div class="section-header reveal">
+    <div class="section-number">05 / КОНЦЕНТРАЦИЯ</div>
+    <h2 class="section-title">ИНДЕКС<br><em>ХЕРФИНДАЛЯ–ХИРШМАНА</em></h2>
+  </div>
+  <div class="hhi-wrap reveal">
+    <div>
+      <div class="hhi-num-big">2436</div>
+      <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gray-text);margin-top:12px">HHI — высококонцентрированный рынок</div>
+      <div class="hhi-desc">Значение HHI &gt; 1800 свидетельствует о высококонцентрированном рынке. Nike, Adidas и New Balance формируют ядро рынка. Высокие барьеры для новых участников.</div>
+      <div style="margin-top:28px;padding:20px;background:rgba(255,85,0,0.07);border-left:3px solid var(--orange);">
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:8px">Расчёт HHI</div>
+        <div style="font-family:'Bebas Neue';font-size:16px;color:#aaa;letter-spacing:1px">27² + 19² + 7² + 6² + 6² + 35² = <span style="color:var(--orange)">2436</span></div>
+      </div>
+    </div>
+    <div class="competitor-bars">
+      <div class="comp-row"><div class="comp-name" style="color:var(--orange)">Nike</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:77%;background:var(--orange)"><span style="font-size:11px;font-weight:700;color:var(--black)">729</span></div></div><div class="comp-pct" style="color:var(--orange)">27%</div></div>
+      <div class="comp-row"><div class="comp-name">Прочие</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:100%;background:rgba(255,255,255,.12)"><span style="font-size:11px;color:#888">1225</span></div></div><div class="comp-pct">35%</div></div>
+      <div class="comp-row"><div class="comp-name">Adidas</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:54%;background:rgba(255,255,255,.2)"><span style="font-size:11px;color:#aaa">361</span></div></div><div class="comp-pct">19%</div></div>
+      <div class="comp-row"><div class="comp-name">New Balance</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:14%;background:rgba(255,255,255,.1)"><span style="font-size:11px;color:#888">49</span></div></div><div class="comp-pct">7%</div></div>
+      <div class="comp-row"><div class="comp-name">Puma</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:10%;background:rgba(255,255,255,.07)"></div></div><div class="comp-pct">6%</div></div>
+      <div class="comp-row"><div class="comp-name">Under Armour</div><div class="comp-bar-wrap"><div class="comp-bar" style="width:10%;background:rgba(255,255,255,.05)"></div></div><div class="comp-pct">6%</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 06 SWOT -->
+<section id="swot">
+  <div class="section-header reveal">
+    <div class="section-number">06 / СТРАТЕГИЯ</div>
+    <h2 class="section-title">SWOT<br><em>АНАЛИЗ</em></h2>
+  </div>
+  <div class="swot-grid reveal">
+    <div class="swot-cell s"><div class="swot-letter">S</div><div class="swot-title">Сильные стороны</div><ul class="swot-list"><li>Лидер мирового рынка спортивной обуви и одежды</li><li>Сильнейший бренд и слоган «Just Do It»</li><li>Технологии Air, Flyknit, React, ZoomX</li><li>Развитая глобальная сеть продаж</li><li>Эффективные коллаборации (Jordan, Travis Scott)</li></ul></div>
+    <div class="swot-cell w"><div class="swot-letter">W</div><div class="swot-title">Слабые стороны</div><ul class="swot-list"><li>Высокая зависимость от подрядчиков в Азии</li><li>Высокие расходы на маркетинг</li><li>Репутационные риски (условия труда)</li><li>Ограниченный контроль цепочек поставок</li><li>Слабое присутствие на развивающихся рынках</li></ul></div>
+    <div class="swot-cell o"><div class="swot-letter">O</div><div class="swot-title">Возможности</div><ul class="swot-list"><li>Рост спроса на устойчивую продукцию</li><li>Развитие онлайн-продаж и персонализации</li><li>AR/VR, NFT и метавселенные для продвижения</li><li>Популяризация ЗОЖ во всём мире</li><li>Коллаборации с дизайнерами и артистами</li></ul></div>
+    <div class="swot-cell t"><div class="swot-letter">T</div><div class="swot-title">Угрозы</div><ul class="swot-list"><li>Высокая конкуренция: Adidas, Puma, Under Armour</li><li>Рост цен на сырьё и логистику</li><li>Критика за условия труда на фабриках</li><li>Замедление роста на китайском рынке</li><li>Угроза подделок и нелегальных копий</li></ul></div>
+  </div>
+  <div style="margin-top:2px;padding:32px;background:rgba(255,85,0,0.06);border:1px solid var(--border);" class="reveal">
+    <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:3px;color:var(--orange);margin-bottom:12px">Стратегическая позиция</div>
+    <div style="font-size:16px;font-weight:300;line-height:1.7;color:#ccc">Агрессивное развитие инноваций и устойчивого брендинга с диверсификацией поставок и усилением цифровых платформ. Ключевые направления: устойчивое производство, персонализированный клиентский опыт, цифровая интеграция и защита бренда.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 07 SEGMENTS + LTV -->
+<section id="segments">
+  <div class="section-header reveal">
+    <div class="section-number">07 / СЕГМЕНТАЦИЯ</div>
+    <h2 class="section-title">ЦЕЛЕВЫЕ<br><em>СЕГМЕНТЫ & LTV</em></h2>
+    <p class="section-desc">Nike реализует многофакторную модель сегментирования: демографическую, психографическую, поведенческую и по выгодам.</p>
+  </div>
+  <div class="segments-grid reveal">
+    <div class="segment-card">
+      <div class="seg-num">01</div>
+      <div class="seg-title">Профессиональные спортсмены</div>
+      <div class="seg-desc">Мужчины и женщины 18–40 лет, регулярно тренирующиеся. Нуждаются в функциональной экипировке. Высокая частота покупок — ~2 раза в год. Средний чек — 13 000 ₽.</div>
+      <div class="seg-ltv"><div class="ltv-label">LTV = 13 000 × 0,17 × 96 мес.</div><div class="ltv-value" style="color:var(--orange)">212 160 ₽</div></div>
+    </div>
+    <div class="segment-card">
+      <div class="seg-num">02</div>
+      <div class="seg-title">Активные горожане</div>
+      <div class="seg-desc">Мужчины и женщины 20–45 лет, студенты и офисные сотрудники. Хотят стиль и комфорт каждый день. Средний чек — 15 000 ₽, ~1,5 раза в год.</div>
+      <div class="seg-ltv"><div class="ltv-label">LTV = 15 000 × 0,12 × 72 мес.</div><div class="ltv-value">129 600 ₽</div></div>
+    </div>
+    <div class="segment-card">
+      <div class="seg-num">03</div>
+      <div class="seg-title">Молодёжь & Коллекционеры</div>
+      <div class="seg-desc">Молодёжь 16–30 лет, инфлюенсеры, поклонники уличной моды. Лимитированные коллекции. Средний чек — 25 000 ₽, ~1 раз в год.</div>
+      <div class="seg-ltv"><div class="ltv-label">LTV = 25 000 × 0,08 × 48 мес.</div><div class="ltv-value">96 000 ₽</div></div>
+    </div>
+  </div>
+
+  <!-- LTV CHART -->
+  <div class="reveal" style="margin-top:40px;padding:32px;background:var(--gray);border:1px solid rgba(255,255,255,.04);">
+    <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;color:var(--orange);margin-bottom:24px;">Сравнение LTV по сегментам</div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600">Профессиональные спортсмены</span><span style="font-family:'Bebas Neue';font-size:20px;color:var(--orange)">212 160 ₽</span></div>
+        <div style="height:20px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;"><div style="width:100%;height:100%;background:var(--orange);border-radius:2px;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600">Активные горожане</span><span style="font-family:'Bebas Neue';font-size:20px;color:#aaa">129 600 ₽</span></div>
+        <div style="height:20px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;"><div style="width:61%;height:100%;background:rgba(255,255,255,.3);border-radius:2px;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:600">Молодёжь & Коллекционеры</span><span style="font-family:'Bebas Neue';font-size:20px;color:#666">96 000 ₽</span></div>
+        <div style="height:20px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;"><div style="width:45%;height:100%;background:rgba(255,255,255,.15);border-radius:2px;"></div></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;font-size:13px;font-weight:300;color:var(--gray-text);border-top:1px solid rgba(255,255,255,.06);padding-top:16px;">
+      <strong style="color:var(--white)">Вывод:</strong> Сегмент профессиональных спортсменов приносит наибольшую пожизненную ценность. Именно в него Nike целесообразно направлять основные маркетинговые ресурсы.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== NEW SECTION: SEGMENTATION PROCESS ===== -->
+<section id="segprocess">
+  <div class="section-header reveal">
+    <div class="section-number">08 / ПРОЦЕСС СЕГМЕНТАЦИИ</div>
+    <h2 class="section-title">ФОРМИРОВАНИЕ<br><em>СЕГМЕНТАЦИИ РЫНКА</em></h2>
+    <p class="section-desc">Принципы и методы сегментирования рынка на примере компании Nike.</p>
+  </div>
+
+  <!-- DEFINITION BOX -->
+  <div class="reveal" style="padding:36px;background:rgba(255,85,0,.06);border:1px solid var(--border);margin-bottom:40px;">
+    <div style="font-family:'Bebas Neue';font-size:14px;letter-spacing:4px;color:var(--orange);margin-bottom:16px;">Определение</div>
+    <div style="font-size:20px;font-weight:300;line-height:1.7;color:#ddd;font-style:italic;">
+      <strong style="font-style:normal;color:var(--white)">Сегментация рынка</strong> — процесс разделения совокупного рынка на относительно однородные группы потребителей (сегменты), отличающиеся по потребностям, поведению, мотивации и реакции на маркетинговые воздействия.
+    </div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;">Сегмент рынка</div>
+        <div style="font-size:14px;font-weight:300;color:#ccc;line-height:1.6;">Группа потребителей со схожими потребностями, характеристиками и покупательским поведением, на которую может быть направлено отдельное маркетинговое предложение.</div>
+      </div>
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;">Целевой сегмент</div>
+        <div style="font-size:14px;font-weight:300;color:#ccc;line-height:1.6;">Сегмент, выбранный компанией как приоритетный для обслуживания — с учётом стратегических целей, конкурентных преимуществ и ожидаемой рентабельности (LTV).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6-STEP PROCESS -->
+  <div class="reveal">
+    <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;margin-bottom:24px;">Этапы процесса сегментирования</div>
+  </div>
+  <div class="seg-process-steps reveal">
+    <div class="seg-step">
+      <div class="seg-step-badge">1</div>
+      <div class="seg-step-num">01</div>
+      <div class="seg-step-title">Определение рынка</div>
+      <div class="seg-step-text">Выделение базового рынка. Для Nike — мировой рынок спортивной обуви, одежды и аксессуаров. Объём: $420 млрд (2024).</div>
+    </div>
+    <div class="seg-step">
+      <div class="seg-step-badge">2</div>
+      <div class="seg-step-num">02</div>
+      <div class="seg-step-title">Выбор критериев</div>
+      <div class="seg-step-text">Определение параметров сегментации: демографические, поведенческие, психографические, географические и по выгодам.</div>
+    </div>
+    <div class="seg-step">
+      <div class="seg-step-badge">3</div>
+      <div class="seg-step-num">03</div>
+      <div class="seg-step-title">Формирование сегментов</div>
+      <div class="seg-step-text">Группировка потребителей с однородными характеристиками. Nike выделяет 3 ключевых сегмента через цифровую аналитику приложений.</div>
+    </div>
+    <div class="seg-step">
+      <div class="seg-step-badge">4</div>
+      <div class="seg-step-num">04</div>
+      <div class="seg-step-title">Оценка привлекательности</div>
+      <div class="seg-step-text">Анализ ёмкости, темпов роста, конкуренции, прибыльности. Расчёт LTV для каждого сегмента Nike подтверждает приоритет спортсменов.</div>
+    </div>
+    <div class="seg-step">
+      <div class="seg-step-badge">5</div>
+      <div class="seg-step-num">05</div>
+      <div class="seg-step-title">Выбор целевых сегментов</div>
+      <div class="seg-step-text">Определение сегментов для концентрации маркетинговых усилий. Для Nike целевым является сегмент профессиональных спортсменов (LTV 212 160 ₽).</div>
+    </div>
+    <div class="seg-step">
+      <div class="seg-step-badge">6</div>
+      <div class="seg-step-num">06</div>
+      <div class="seg-step-title">Позиционирование</div>
+      <div class="seg-step-text">Формирование уникального предложения для каждого сегмента: технологии — спортсменам, lifestyle — горожанам, эксклюзив — молодёжи.</div>
+    </div>
+  </div>
+
+  <!-- PRINCIPLES -->
+  <div class="reveal" style="margin-top:60px;">
+    <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;margin-bottom:24px;">Принципы сегментации рынка</div>
+    <div class="principles-grid">
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 01</div>
+        <div class="principle-name">Измеримость</div>
+        <div class="principle-desc">Сегмент должен быть количественно оценим — размер, доход, частота покупок. Nike измеряет через Nike App и данные о транзакциях.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 02</div>
+        <div class="principle-name">Достаточная ёмкость</div>
+        <div class="principle-desc">Сегмент должен обеспечивать экономическую целесообразность. Все три сегмента Nike генерируют значительный оборот.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 03</div>
+        <div class="principle-name">Доступность</div>
+        <div class="principle-desc">Возможность эффективного охвата каналами маркетинга. Nike использует цифровые каналы, соцсети и 1000+ фирменных магазинов.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 04</div>
+        <div class="principle-name">Дифференцируемость</div>
+        <div class="principle-desc">Сегменты чётко отличаются друг от друга. Спортсмен ≠ горожанин ≠ коллекционер — разные мотивации и поведение.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 05</div>
+        <div class="principle-name">Стабильность</div>
+        <div class="principle-desc">Сегмент сохраняет характеристики во времени. Сегменты Nike стабильны на протяжении 10+ лет с адаптацией к трендам.</div>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">ПРИНЦИП 06</div>
+        <div class="principle-name">Практическая применимость</div>
+        <div class="principle-desc">Сегментация должна быть полезна для маркетинговых решений. Nike применяет её для разработки линеек, ценообразования и продвижения.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METHODS -->
+  <div class="reveal" style="margin-top:60px;">
+    <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;margin-bottom:8px;">Методы сегментации рынка</div>
+    <div style="font-size:14px;font-weight:300;color:var(--gray-text);margin-bottom:24px;">Применяемые Nike на практике — с примерами из реальной маркетинговой деятельности компании.</div>
+    <div class="methods-list">
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">01 Географическая</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Разделение по территориальному признаку</div>
+          <div class="method-content-text">Nike адаптирует ассортимент под регионы: в Северной Америке — баскетбол и lifestyle, в Европе — футбол и тренировочная экипировка, в Азии — digital-каналы и локальные коллаборации. Это позволяет учитывать культурные и экономические особенности каждого рынка.</div>
+        </div>
+      </div>
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">02 Демографическая</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Возраст, пол, уровень дохода, род занятий</div>
+          <div class="method-content-text">Для молодёжи — модные и лимитированные коллекции. Для взрослых — функциональность и универсальность. Nike ориентируется преимущественно на потребителей со средним и высоким уровнем дохода — соответствует премиальному позиционированию бренда.</div>
+        </div>
+      </div>
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">03 Социально-экономическая</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Уровень дохода и социальный статус</div>
+          <div class="method-content-text">Jordan Brand и лимитированные релизы — для потребителей с высоким доходом. Базовые коллекции — для массового покупателя. Такой подход позволяет поддерживать высокую маржинальность и одновременно расширять охват.</div>
+        </div>
+      </div>
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">04 Психографическая</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Образ жизни, ценности, установки</div>
+          <div class="method-content-text">Nike ориентируется на людей, стремящихся к самосовершенствованию и активному образу жизни. Через «Just Do It» бренд формирует эмоциональную связь с клиентами. Отдельный сегмент — потребители, для которых важны экологичность и социальная ответственность.</div>
+        </div>
+      </div>
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">05 Поведенческая</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Частота покупок, лояльность, вовлечённость</div>
+          <div class="method-content-text">Nike отслеживает поведение через Nike App, Run Club, Training Club. На основе данных формируются персональные предложения и программы лояльности. NikePlus — 160+ млн участников. Поведенческая сегментация позволяет удерживать клиентов и повышать LTV.</div>
+        </div>
+      </div>
+      <div class="method-row">
+        <div class="method-label"><div class="method-label-text">06 По выгодам</div></div>
+        <div class="method-content">
+          <div class="method-content-title">Ключевая выгода, которую ищет потребитель</div>
+          <div class="method-content-text">Один покупатель ищет максимальный спортивный результат, другой — комфорт на каждый день, третий — статус и уникальность. Без сегментации по выгодам компания теряет эффективность даже при одном SKU — «кроссовках Nike».
+            <table class="benefit-table" style="margin-top:16px;">
+              <tr><th>Выгода</th><th>Сегмент Nike</th></tr>
+              <tr><td>Функциональность и результат</td><td style="color:var(--orange);font-weight:600">Профессиональные спортсмены</td></tr>
+              <tr><td>Комфорт и универсальность</td><td>Активные горожане</td></tr>
+              <tr><td>Уникальность и статус</td><td>Молодёжь и коллекционеры</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL SEGMENTATION MODEL -->
+  <div class="reveal" style="margin-top:60px;">
+    <div style="font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;margin-bottom:8px;">Итоговая модель сегментации Nike</div>
+    <div style="font-size:14px;font-weight:300;color:var(--gray-text);margin-bottom:24px;">На основе сочетания всех принципов и методов</div>
+    <table class="seg-model-table">
+      <tr>
+        <th>Сегмент</th>
+        <th>Характеристика</th>
+        <th>Метод сегментации</th>
+        <th>Ценность для Nike</th>
+      </tr>
+      <tr>
+        <td><strong style="color:var(--orange)">Профессиональные спортсмены</strong></td>
+        <td>Регулярные тренировки, высокая частота покупок, лояльность к бренду</td>
+        <td>Поведенческая, по выгодам</td>
+        <td><strong style="color:var(--orange)">Максимальный LTV: 212 160 ₽</strong></td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ccc">Активные горожане</strong></td>
+        <td>Комфорт и стиль в повседневной жизни, умеренная активность</td>
+        <td>Психографическая, демографическая</td>
+        <td>Массовый охват · 129 600 ₽</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#888">Молодёжь & Коллекционеры</strong></td>
+        <td>Эксклюзивность, самовыражение, digital-каналы</td>
+        <td>Психографическая, демографическая</td>
+        <td>Имидж бренда · 96 000 ₽</td>
+      </tr>
+    </table>
+    <div style="margin-top:24px;padding:24px;background:rgba(255,85,0,.06);border-left:3px solid var(--orange);">
+      <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:8px">Вывод по сегментации</div>
+      <div style="font-size:14px;font-weight:300;line-height:1.7;color:#ccc">Nike использует научно обоснованный и практико-ориентированный процесс сегментации, основанный на сочетании классических и цифровых методов анализа потребителей. Такой подход позволяет эффективно распределять маркетинговые ресурсы, разрабатывать персонализированные предложения, повышать лояльность и LTV клиентов, сохраняя лидерские позиции в условиях высокой конкуренции.</div>
+    </div>
+  </div>
+
+  <!-- PHOTO PROOF for segmentation -->
+  <div class="photo-proof reveal" style="margin-top:40px;">
+    <div class="photo-card photo-slot" style="position:relative;">
+      <img id="img-seg1" src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&q=80" alt="Профессиональные спортсмены" style="width:100%;height:100%;object-fit:cover;">
+      <div class="photo-overlay"></div>
+      <div class="photo-caption"><div class="source">Сегмент 1 · Спортсмены</div><div class="desc">LTV 212 160 ₽ · Основной целевой сегмент</div></div>
+      <button class="upload-btn" onclick="triggerUpload('seg1')">+ ФОТО</button>
+      <input class="upload-input" id="file-seg1" type="file" accept="image/*" onchange="loadPhoto(this,'img-seg1','')">
+    </div>
+    <div class="photo-card photo-slot" style="position:relative;">
+      <img id="img-seg2" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80" alt="Активные горожане" style="width:100%;height:100%;object-fit:cover;">
+      <div class="photo-overlay"></div>
+      <div class="photo-caption"><div class="source">Сегмент 2 · Горожане</div><div class="desc">LTV 129 600 ₽ · Массовый охват</div></div>
+      <button class="upload-btn" onclick="triggerUpload('seg2')">+ ФОТО</button>
+      <input class="upload-input" id="file-seg2" type="file" accept="image/*" onchange="loadPhoto(this,'img-seg2','')">
+    </div>
+    <div class="photo-card photo-slot" style="position:relative;">
+      <img id="img-seg3" src="https://images.unsplash.com/photo-1556906781-9a412961a28b?w=600&q=80" alt="Молодёжь" style="width:100%;height:100%;object-fit:cover;">
+      <div class="photo-overlay"></div>
+      <div class="photo-caption"><div class="source">Сегмент 3 · Молодёжь</div><div class="desc">LTV 96 000 ₽ · Имидж бренда</div></div>
+      <button class="upload-btn" onclick="triggerUpload('seg3')">+ ФОТО</button>
+      <input class="upload-input" id="file-seg3" type="file" accept="image/*" onchange="loadPhoto(this,'img-seg3','')">
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 09 ENDORSEMENTS -->
+<section id="endorsements">
+  <div class="section-header reveal">
+    <div class="section-number">09 / АМБАССАДОРЫ</div>
+    <h2 class="section-title">ЗВЁЗДНЫЕ<br><em>ПАРТНЁРСТВА</em></h2>
+    <p class="section-desc">Nike построила величайший в истории спорта портфель атлетических амбассадоров. Их контракты — доказательство доверия мирового спорта к бренду.</p>
+  </div>
+
+  <div class="endorsement-grid reveal">
+    <!-- Michael Jordan -->
+    <div class="endorse-card photo-slot" style="position:relative;">
+      <img id="img-jordan" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Michael_Jordan_in_2014.jpg/400px-Michael_Jordan_in_2014.jpg" alt="Майкл Джордан" style="width:100%;height:100%;object-fit:cover;object-position:top;" onerror="this.style.display='none';document.getElementById('ph-jordan').style.display='flex'">
+      <div id="ph-jordan" class="photo-placeholder" style="display:none;position:absolute;inset:0;min-height:420px;"><div class="ph-icon">🏀</div><div class="ph-text">Майкл Джордан<br>Нажмите + ФОТО</div></div>
+      <div class="endorse-overlay"></div>
+      <div class="endorse-badge">ЛЕГЕНДА</div>
+      <div class="endorse-info">
+        <div class="endorse-name">Майкл Джордан</div>
+        <div class="endorse-detail">NBA · 6× Чемпион · Air Jordan с 1984</div>
+        <div class="endorse-contract">Jordan Brand: $7 млрд/год</div>
+      </div>
+      <button class="upload-btn" onclick="triggerUpload('jordan')">+ ФОТО</button>
+      <input class="upload-input" id="file-jordan" type="file" accept="image/*" onchange="loadPhoto(this,'img-jordan','ph-jordan')">
+    </div>
+    <!-- Cristiano Ronaldo -->
+    <div class="endorse-card photo-slot" style="position:relative;">
+      <img id="img-ronaldo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cristiano_Ronaldo_2018.jpg/400px-Cristiano_Ronaldo_2018.jpg" alt="Криштиану Роналду" style="width:100%;height:100%;object-fit:cover;object-position:top;" onerror="this.style.display='none';document.getElementById('ph-ronaldo').style.display='flex'">
+      <div id="ph-ronaldo" class="photo-placeholder" style="display:none;position:absolute;inset:0;min-height:420px;"><div class="ph-icon">⚽</div><div class="ph-text">Криштиану Роналду<br>Нажмите + ФОТО</div></div>
+      <div class="endorse-overlay"></div>
+      <div class="endorse-badge">ПОЖИЗНЕННЫЙ</div>
+      <div class="endorse-info">
+        <div class="endorse-name">Криштиану Роналду</div>
+        <div class="endorse-detail">Футбол · 5× Золотой Мяч · CR7 с 2003</div>
+        <div class="endorse-contract">Пожизненный контракт: ~$1 млрд</div>
+      </div>
+      <button class="upload-btn" onclick="triggerUpload('ronaldo')">+ ФОТО</button>
+      <input class="upload-input" id="file-ronaldo" type="file" accept="image/*" onchange="loadPhoto(this,'img-ronaldo','ph-ronaldo')">
+    </div>
+    <!-- LeBron James -->
+    <div class="endorse-card photo-slot" style="position:relative;">
+      <img id="img-lebron" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/LeBron_James_%2851959977144%29_%28cropped2%29.jpg/400px-LeBron_James_%2851959977144%29_%28cropped2%29.jpg" alt="ЛеБрон Джеймс" style="width:100%;height:100%;object-fit:cover;object-position:top;" onerror="this.style.display='none';document.getElementById('ph-lebron').style.display='flex'">
+      <div id="ph-lebron" class="photo-placeholder" style="display:none;position:absolute;inset:0;min-height:420px;"><div class="ph-icon">🏀</div><div class="ph-text">ЛеБрон Джеймс<br>Нажмите + ФОТО</div></div>
+      <div class="endorse-overlay"></div>
+      <div class="endorse-badge">$1 МЛРД</div>
+      <div class="endorse-info">
+        <div class="endorse-name">ЛеБрон Джеймс</div>
+        <div class="endorse-detail">NBA · 4× MVP · LeBron Line с 2003</div>
+        <div class="endorse-contract">Пожизненный контракт: $1 млрд+</div>
+      </div>
+      <button class="upload-btn" onclick="triggerUpload('lebron')">+ ФОТО</button>
+      <input class="upload-input" id="file-lebron" type="file" accept="image/*" onchange="loadPhoto(this,'img-lebron','ph-lebron')">
+    </div>
+  </div>
+
+  <div class="reveal" style="margin-top:3px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">
+    <div style="background:var(--gray);padding:24px;text-align:center;border-top:3px solid var(--orange);"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--white)">Серена Уильямс</div><div style="font-size:11px;color:var(--gray-text);margin-top:4px;letter-spacing:1px">Теннис · 23× Grand Slam</div></div>
+    <div style="background:var(--gray);padding:24px;text-align:center;border-top:3px solid rgba(255,85,0,0.4);"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--white)">Трэвис Скотт</div><div style="font-size:11px;color:var(--gray-text);margin-top:4px;letter-spacing:1px">Музыка · Cactus Jack коллаб</div></div>
+    <div style="background:var(--gray);padding:24px;text-align:center;border-top:3px solid rgba(255,85,0,0.4);"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--white)">Килиан Мбаппе</div><div style="font-size:11px;color:var(--gray-text);margin-top:4px;letter-spacing:1px">Футбол · ЧМ-2018 победитель</div></div>
+    <div style="background:var(--gray);padding:24px;text-align:center;border-top:3px solid rgba(255,85,0,0.4);"><div style="font-family:'Bebas Neue';font-size:22px;color:var(--white)">Найоми Осака</div><div style="font-size:11px;color:var(--gray-text);margin-top:4px;letter-spacing:1px">Теннис · 4× Grand Slam</div></div>
+  </div>
+
+  <div class="news-grid reveal" style="margin-top:40px;">
+    <div class="news-card">
+      <div class="news-source">WSJ · 2024</div>
+      <div class="news-headline">Air Jordan Brand Generates Over $7 Billion Annually</div>
+      <div class="news-body">The Air Jordan sub-brand, launched in 1984 with Michael Jordan, now generates more than $7 billion in annual revenue. The original contract paid Jordan $2.5 million plus royalties.</div>
+      <div class="news-date">Март 2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">ESPN · 2016</div>
+      <div class="news-headline">Cristiano Ronaldo Signs Lifetime Deal Worth $1 Billion with Nike</div>
+      <div class="news-body">Nike signed Cristiano Ronaldo to a lifetime endorsement contract reportedly worth $1 billion — one of the largest athlete endorsement deals in history. Ronaldo has been with Nike since 2003.</div>
+      <div class="news-date">Ноябрь 2016</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">Forbes · 2023</div>
+      <div class="news-headline">LeBron James Lifetime Nike Deal Surpasses $1 Billion in Value</div>
+      <div class="news-body">LeBron James's lifetime deal with Nike, signed in 2015, is now worth over $1 billion. The partnership began in 2003 when he signed a $90M contract as a rookie.</div>
+      <div class="news-date">2023</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 10 4P -->
+<section id="marketing4p">
+  <div class="section-header reveal">
+    <div class="section-number">10 / МАРКЕТИНГ</div>
+    <h2 class="section-title">КОМПЛЕКС<br><em>МАРКЕТИНГА 4P</em></h2>
+    <p class="section-desc">Итоговая оценка: <strong style="color:var(--orange)">4,5 / 5</strong> — целостная, сбалансированная стратегия.</p>
+  </div>
+  <div class="fourp-grid reveal">
+    <div class="fourp-card"><div class="fourp-letter">P</div><div class="fourp-label">Product — Товар</div><div class="fourp-text">Спортивная обувь, одежда и аксессуары. Инновационные технологии: <strong style="color:var(--white)">Air, Flyknit, React, ZoomX</strong>. Широкий ассортимент от профессионального спорта до уличной моды. Move to Zero.<br><br><em style="color:var(--gray-text);font-size:13px">Сильные стороны: инновационные технологии, сильный бренд, широкий ассортимент. Слабые: высокая стоимость разработки.</em></div><div class="fourp-score"><div class="score-num">5</div><div class="score-bar-wrap"><div class="score-bar" style="width:100%"></div></div></div></div>
+    <div class="fourp-card"><div class="fourp-letter">P</div><div class="fourp-label">Price — Цена</div><div class="fourp-text">Премиально-дифференцированная стратегия. Цены выше среднерыночных. Высокая воспринимаемая ценность. Сезонные скидки и программа лояльности <strong style="color:var(--white)">NikePlus</strong> (160+ млн участников).<br><br><em style="color:var(--gray-text);font-size:13px">Сильные стороны: высокая воспринимаемая ценность. Слабые: ограниченная доступность для чувствительных к цене потребителей.</em></div><div class="fourp-score"><div class="score-num">4</div><div class="score-bar-wrap"><div class="score-bar" style="width:80%"></div></div></div></div>
+    <div class="fourp-card"><div class="fourp-letter">P</div><div class="fourp-label">Place — Сбыт</div><div class="fourp-text">Фирменные магазины + <strong style="color:var(--white)">Nike.com</strong> + приложения + маркетплейсы + партнёрские сети. Омниканальная DTC-модель. 26% продаж — онлайн. 1000+ фирменных магазинов.<br><br><em style="color:var(--gray-text);font-size:13px">Сильные стороны: глобальная дистрибуция, digital-каналы. Слабые: зависимость от международных цепочек поставок.</em></div><div class="fourp-score"><div class="score-num">5</div><div class="score-bar-wrap"><div class="score-bar" style="width:100%"></div></div></div></div>
+    <div class="fourp-card"><div class="fourp-letter">P</div><div class="fourp-label">Promotion — Продвижение</div><div class="fourp-text">Глобальные кампании. Digital-маркетинг. Коллаборации: <strong style="color:var(--white)">Джордан, Роналду, ЛеБрон, Трэвис Скотт</strong>. Бюджет на маркетинг — $4,1 млрд/год. AR/VR форматы.<br><br><em style="color:var(--gray-text);font-size:13px">Сильные стороны: высокая узнаваемость, сильные коллаборации. Слабые: высокие затраты на маркетинг.</em></div><div class="fourp-score"><div class="score-num">4</div><div class="score-bar-wrap"><div class="score-bar" style="width:80%"></div></div></div></div>
+  </div>
+
+  <div class="reveal" style="margin-top:2px;padding:24px 32px;background:rgba(255,85,0,.08);border:1px solid var(--border);display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+    <div style="font-family:'Bebas Neue';font-size:72px;color:var(--orange);line-height:1;">4,5</div>
+    <div>
+      <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--orange);">Итоговая оценка 4P</div>
+      <div style="font-size:16px;font-weight:300;color:#ccc;margin-top:8px;max-width:600px;line-height:1.6;">Комплекс маркетинга Nike является целостным, сбалансированным и ориентированным на долгосрочное развитие. Высокие оценки по всем элементам свидетельствуют о прочных конкурентных позициях на рынке.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 11 RADAR -->
+<section id="radar">
+  <div class="section-header reveal">
+    <div class="section-number">11 / КОНКУРЕНЦИЯ</div>
+    <h2 class="section-title">МНОГОУГОЛЬНИК<br><em>КОНКУРЕНТОСПОСОБНОСТИ</em></h2>
+  </div>
+  <div class="radar-wrap reveal">
+    <canvas id="radarCanvas" width="420" height="420" style="max-width:420px;width:100%"></canvas>
+    <div>
+      <div class="radar-legend">
+        <div><div class="radar-brand"><div class="radar-dot" style="background:var(--orange)"></div><div class="radar-brand-name" style="color:var(--orange)">Nike</div></div><div class="radar-scores"><div class="radar-score-tag">Качество: 9</div><div class="radar-score-tag">Реклама: 9</div><div class="radar-score-tag">R&D: 9</div><div class="radar-score-tag">Сервис: 9</div><div class="radar-score-tag">Цена: 6</div><div class="radar-score-tag">Ассортимент: 8</div></div></div>
+        <div><div class="radar-brand"><div class="radar-dot" style="background:#aaa"></div><div class="radar-brand-name">Adidas</div></div><div class="radar-scores"><div class="radar-score-tag">Качество: 8</div><div class="radar-score-tag">Реклама: 8</div><div class="radar-score-tag">R&D: 7</div><div class="radar-score-tag">Сервис: 8</div><div class="radar-score-tag">Цена: 5</div><div class="radar-score-tag">Ассортимент: 7</div></div></div>
+        <div><div class="radar-brand"><div class="radar-dot" style="background:#555"></div><div class="radar-brand-name" style="color:#888">Puma</div></div><div class="radar-scores"><div class="radar-score-tag">Качество: 7</div><div class="radar-score-tag">Реклама: 6</div><div class="radar-score-tag">R&D: 5</div><div class="radar-score-tag">Сервис: 7</div><div class="radar-score-tag">Цена: 4</div><div class="radar-score-tag">Ассортимент: 6</div></div></div>
+      </div>
+      <div style="margin-top:32px;padding:24px;background:rgba(255,85,0,.06);border-left:3px solid var(--orange);">
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:8px">Вывод</div>
+        <div style="font-size:14px;font-weight:300;line-height:1.7;color:#ccc">Nike обладает комплексным преимуществом по качеству, инновациям, маркетингу и сервису. Adidas сохраняет стабильные позиции. Puma — нишевый игрок.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 12 ABC -->
+<section id="abc">
+  <div class="section-header reveal">
+    <div class="section-number">12 / АССОРТИМЕНТ</div>
+    <h2 class="section-title">ABC<br><em>АНАЛИЗ</em></h2>
+    <p class="section-desc">Совокупная выручка: <strong style="color:var(--orange)">4 676 300 000 ₽</strong>. Группа A формирует 77,84% оборота.</p>
+  </div>
+  <div class="abc-bars reveal">
+    <div class="abc-row" style="margin-bottom:8px;opacity:.5">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-text)">Товар</div>
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-text)">Доля выручки</div>
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-text);text-align:right">Выручка</div>
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray-text);text-align:center">Группа</div>
+    </div>
+    <div class="abc-row"><div class="abc-product">Кроссовки</div><div class="abc-bar-wrap"><div class="abc-bar grp-a" style="width:100%">31,47%</div></div><div class="abc-revenue" style="color:var(--orange)">1 472 млн ₽</div><div><span class="abc-group-badge a">A</span></div></div>
+    <div class="abc-row"><div class="abc-product">Футболки</div><div class="abc-bar-wrap"><div class="abc-bar grp-a" style="width:65%">33,51%</div></div><div class="abc-revenue" style="color:var(--orange)">961 млн ₽</div><div><span class="abc-group-badge a">A</span></div></div>
+    <div class="abc-row"><div class="abc-product">Толстовки</div><div class="abc-bar-wrap"><div class="abc-bar grp-a" style="width:57%">14,05%</div></div><div class="abc-revenue" style="color:var(--orange)">845 млн ₽</div><div><span class="abc-group-badge a">A</span></div></div>
+    <div class="abc-row"><div class="abc-product">Аксессуары</div><div class="abc-bar-wrap"><div class="abc-bar grp-a" style="width:8%">12,97%</div></div><div class="abc-revenue" style="color:var(--orange)">120 млн ₽</div><div><span class="abc-group-badge a">A</span></div></div>
+    <div class="abc-row"><div class="abc-product">Спортивные брюки</div><div class="abc-bar-wrap"><div class="abc-bar grp-b" style="width:40%">11,35%</div></div><div class="abc-revenue">598 млн ₽</div><div><span class="abc-group-badge b">B</span></div></div>
+    <div class="abc-row"><div class="abc-product">Рюкзаки</div><div class="abc-bar-wrap"><div class="abc-bar grp-c" style="width:15%">6,27%</div></div><div class="abc-revenue" style="color:#666">226 млн ₽</div><div><span class="abc-group-badge c">C</span></div></div>
+    <div class="abc-row"><div class="abc-product">Куртки</div><div class="abc-bar-wrap"><div class="abc-bar grp-c" style="width:30%">4,54%</div></div><div class="abc-revenue" style="color:#666">453 млн ₽</div><div><span class="abc-group-badge c">C</span></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 13 PEST -->
+<section id="pest">
+  <div class="section-header reveal">
+    <div class="section-number">13 / СРЕДА</div>
+    <h2 class="section-title">PEST<br><em>АНАЛИЗ</em></h2>
+  </div>
+  <div class="pest-grid reveal">
+    <div class="pest-card">
+      <div class="pest-header">Политические факторы</div>
+      <div class="pest-factor"><div class="pest-name">Торговые пошлины США–Китай</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:89%"></div></div><div class="pest-weight">Вес: 0,35</div></div>
+      <div class="pest-factor"><div class="pest-name">Геополитическая нестабильность</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:80%"></div></div><div class="pest-weight">Вес: 0,31</div></div>
+      <div class="pest-factor"><div class="pest-name">Законодательство ESG</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:45%"></div></div><div class="pest-weight">Вес: 0,18</div></div>
+    </div>
+    <div class="pest-card">
+      <div class="pest-header">Экономические факторы</div>
+      <div class="pest-factor"><div class="pest-name">Рост цен на сырьё и логистику</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:89%"></div></div><div class="pest-weight">Вес: 0,35</div></div>
+      <div class="pest-factor"><div class="pest-name">Уровень потребительских расходов</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:85%"></div></div><div class="pest-weight">Вес: 0,34</div></div>
+      <div class="pest-factor"><div class="pest-name">Колебания курсов валют</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:80%"></div></div><div class="pest-weight">Вес: 0,32</div></div>
+    </div>
+    <div class="pest-card">
+      <div class="pest-header">Социально-культурные факторы</div>
+      <div class="pest-factor"><div class="pest-name">Рост интереса к спорту и ЗОЖ</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:89%"></div></div><div class="pest-weight">Вес: 0,35</div></div>
+      <div class="pest-factor"><div class="pest-name">Популярность спортивной моды</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:85%"></div></div><div class="pest-weight">Вес: 0,34</div></div>
+      <div class="pest-factor"><div class="pest-name">Влияние инфлюенсеров</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:45%"></div></div><div class="pest-weight">Вес: 0,18</div></div>
+    </div>
+    <div class="pest-card">
+      <div class="pest-header">Технологические факторы</div>
+      <div class="pest-factor"><div class="pest-name">Инновации Air, Flyknit, ZoomX</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:89%"></div></div><div class="pest-weight">Вес: 0,35</div></div>
+      <div class="pest-factor"><div class="pest-name">Онлайн-продажи и персонализация</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:85%"></div></div><div class="pest-weight">Вес: 0,34</div></div>
+      <div class="pest-factor"><div class="pest-name">AR/VR и метавселенная</div><div class="pest-bar-wrap"><div class="pest-bar" style="width:45%"></div></div><div class="pest-weight">Вес: 0,18</div></div>
+    </div>
+  </div>
+  <div class="news-grid reveal" style="margin-top:40px;">
+    <div class="news-card">
+      <div class="news-source">Financial Times · 2024</div>
+      <div class="news-headline">US-China Trade Tensions Impact Nike's Supply Chain Strategy</div>
+      <div class="news-body">Nike is accelerating supply chain diversification away from China toward Vietnam, Indonesia, and India. Vietnam now produces 50% of Nike's footwear.</div>
+      <div class="news-date">2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">Statista · 2024</div>
+      <div class="news-headline">Global Sportswear Market to Reach $530B by 2030</div>
+      <div class="news-body">The global athletic apparel market, valued at $420 billion in 2024, is projected to grow at a CAGR of 4.5–5% through 2030, driven by rising health consciousness.</div>
+      <div class="news-date">2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">TechCrunch · 2023</div>
+      <div class="news-headline">Nike's Digital Ecosystem Surpasses 500 Million App Downloads</div>
+      <div class="news-body">Nike Run Club, Nike Training Club, and Nike App have collectively surpassed 500 million downloads. Digital ecosystem is central to Nike's DTC strategy.</div>
+      <div class="news-date">2023</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 14 SUSTAINABILITY -->
+<section id="sustainability">
+  <div class="section-header reveal">
+    <div class="section-number">14 / УСТОЙЧИВОСТЬ</div>
+    <h2 class="section-title">MOVE TO<br><em>ZERO</em></h2>
+    <p class="section-desc">Программа Nike по достижению нулевых выбросов углерода и нулевых отходов производства.</p>
+  </div>
+  <div class="sustain-layout reveal">
+    <div class="sustain-img photo-slot" style="position:relative;">
+      <img id="img-sustain" src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80" alt="Sustainability" style="width:100%;height:100%;object-fit:cover;">
+      <button class="upload-btn" onclick="triggerUpload('sustain')">+ ФОТО</button>
+      <input class="upload-input" id="file-sustain" type="file" accept="image/*" onchange="loadPhoto(this,'img-sustain','')">
+    </div>
+    <div class="sustain-stats">
+      <div class="sustain-stat"><div class="sustain-num">79%</div><div class="sustain-text-wrap"><div class="sustain-label">Переработанный полиэстер</div><div class="sustain-detail">Доля переработанного полиэстера в коллекции Nike 2024</div></div></div>
+      <div class="sustain-stat"><div class="sustain-num">100%</div><div class="sustain-text-wrap"><div class="sustain-label">Возобновляемая энергия</div><div class="sustain-detail">Объекты Nike в США и Европе используют 100% чистую энергию</div></div></div>
+      <div class="sustain-stat"><div class="sustain-num">700K</div><div class="sustain-text-wrap"><div class="sustain-label">Обуви переработано</div><div class="sustain-detail">Программа Reuse-A-Shoe собрала 700 000+ пар в 2023</div></div></div>
+      <div class="sustain-stat"><div class="sustain-num">2050</div><div class="sustain-text-wrap"><div class="sustain-label">Цель: нулевые выбросы</div><div class="sustain-detail">Net-Zero выбросы CO₂ по всей цепочке создания ценности</div></div></div>
+    </div>
+  </div>
+  <div class="news-grid reveal" style="margin-top:40px;">
+    <div class="news-card">
+      <div class="news-source">Nike ESG Report · 2024</div>
+      <div class="news-headline">Nike Move to Zero: 79% Recycled Polyester Achieved in FY2024</div>
+      <div class="news-body">Nike's annual sustainability report confirmed 79% of polyester used in Nike products is now recycled. The company achieved 96% renewable electricity across owned facilities.</div>
+      <div class="news-date">2024</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">Guardian · 2023</div>
+      <div class="news-headline">Nike Space Hippie: Sneakers Made From Factory Scraps Win Design Awards</div>
+      <div class="news-body">Nike's Space Hippie collection, made from factory scraps and recycled materials, won multiple sustainability design awards — the lowest carbon footprint of any Nike shoe.</div>
+      <div class="news-date">2023</div>
+    </div>
+    <div class="news-card">
+      <div class="news-source">CDP · 2024</div>
+      <div class="news-headline">Nike Receives 'A' Score From CDP for Climate Action</div>
+      <div class="news-body">CDP awarded Nike an 'A' rating for its climate change disclosure and action, placing Nike in the top 2% of companies assessed globally.</div>
+      <div class="news-date">2024</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 15 CONCLUSION -->
+<section id="conclusion" style="background:rgba(255,85,0,.04);">
+  <div class="conclusion-inner reveal">
+    <div class="conclusion-mark">✓</div>
+    <h2 class="conclusion-headline">ЗАКЛЮЧЕНИЕ</h2>
+    <p class="conclusion-text">
+      Компания Nike является образцом интегрированного стратегического маркетинга. Сильный бренд, технологические инновации и многофакторная научно обоснованная сегментация обеспечивают устойчивое лидерство. Оценка комплекса 4P — <strong style="color:var(--orange)">4,5/5</strong>. Профессиональные спортсмены формируют наибольшую пожизненную ценность (<strong style="color:var(--orange)">212 160 ₽</strong>). Программа Move to Zero подтверждает ответственность бизнеса. Стратегическая позиция — агрессивное развитие инноваций и устойчивого брендинга с фокусом на DTC и цифровую экосистему.
+    </p>
+    <div class="tag-cloud">
+      <div class="tag">Just Do It</div>
+      <div class="tag">Air Jordan</div>
+      <div class="tag">Move to Zero</div>
+      <div class="tag">DTC Strategy</div>
+      <div class="tag">HHI = 2436</div>
+      <div class="tag">LTV = 212K ₽</div>
+      <div class="tag">27% Market Share</div>
+      <div class="tag">$51.4B Revenue</div>
+      <div class="tag">4P = 4.5/5</div>
+      <div class="tag">NikePlus 160M</div>
+      <div class="tag">6 методов сегментации</div>
+      <div class="tag">6 этапов процесса</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">NIKE <span>INC.</span></div>
+  <div class="footer-info">Курсовая работа · Маркетинговый анализ<br>Nike, Inc. — глобальный лидер спортивной индустрии · 2024/2025</div>
+</footer>
+
+<script>
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+  setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 80);
+});
+document.querySelectorAll('a,button,.swot-cell,.segment-card,.fourp-card,.company-item,.fin-card,.endorse-card,.news-card,.photo-card,.seg-step,.principle-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.width = '20px'; cursor.style.height = '20px'; });
+  el.addEventListener('mouseleave', () => { cursor.style.width = '12px'; cursor.style.height = '12px'; });
+});
+
+// SCROLL REVEAL
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// PHOTO UPLOAD SYSTEM
+function triggerUpload(id) {
+  document.getElementById('file-' + id).click();
+}
+function loadPhoto(input, imgId, phId) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById(imgId);
+    if (img) {
+      img.src = e.target.result;
+      img.style.display = '';
+    }
+    if (phId) {
+      const ph = document.getElementById(phId);
+      if (ph) ph.style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+// DONUT CHART
+const circ = 2 * Math.PI * 80;
+const donutData = [
+  { id:'nike-arc', pct:27, offset:0 },
+  { id:'adidas-arc', pct:19, offset:27 },
+  { id:'nb-arc', pct:7, offset:46 },
+  { id:'puma-arc', pct:6, offset:53 },
+  { id:'ua-arc', pct:6, offset:59 },
+];
+const donutObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      donutData.forEach(d => {
+        const el = document.getElementById(d.id);
+        if (!el) return;
+        el.style.strokeDasharray = (d.pct/100*circ) + ' ' + circ;
+        el.style.strokeDashoffset = -(d.offset/100*circ);
+        el.style.transition = 'stroke-dasharray 1.5s ease';
+      });
+      donutObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+const dw = document.querySelector('.donut-wrap');
+if (dw) donutObs.observe(dw);
+
+// REVENUE BARS
+function animateRevBars() {
+  const ids = ['rb1','rb2','rb3','rb4','rb5','rb6'];
+  ids.forEach(id => {
+    const bar = document.getElementById(id);
+    if (!bar) return;
+    const h = parseInt(bar.dataset.h);
+    bar.style.height = (h * 1.8) + 'px';
+    bar.style.transition = 'height 1.2s ease';
+  });
+}
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { animateRevBars(); revObs.unobserve(e.target); } });
+}, { threshold: 0.3 });
+const revEl = document.querySelector('.rev-chart');
+if (revEl) revObs.observe(revEl);
+
+// RADAR CHART
+function drawRadar() {
+  const canvas = document.getElementById('radarCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = Math.min(W,H)/2 - 50;
+  const labels = ['Качество','Цена','Реклама','Ассортимент','R&D','Сервис'];
+  const n = labels.length;
+  const brands = [
+    { scores:[9,6,9,8,9,9], color:'rgba(255,85,0,0.8)', fill:'rgba(255,85,0,0.15)' },
+    { scores:[8,5,8,7,7,8], color:'rgba(200,200,200,0.6)', fill:'rgba(200,200,200,0.07)' },
+    { scores:[7,4,6,6,5,7], color:'rgba(100,100,100,0.5)', fill:'rgba(100,100,100,0.05)' },
+  ];
+  ctx.clearRect(0,0,W,H);
+  for (let g=1; g<=9; g++) {
+    ctx.beginPath();
+    for (let i=0; i<n; i++) {
+      const a = (Math.PI*2*i/n) - Math.PI/2;
+      const r = R*g/9;
+      i===0 ? ctx.moveTo(cx+r*Math.cos(a), cy+r*Math.sin(a)) : ctx.lineTo(cx+r*Math.cos(a), cy+r*Math.sin(a));
+    }
+    ctx.closePath(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+  }
+  for (let i=0; i<n; i++) {
+    const a = (Math.PI*2*i/n) - Math.PI/2;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R*Math.cos(a), cy+R*Math.sin(a));
+    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.stroke();
+  }
+  ctx.fillStyle='#777'; ctx.font='12px Barlow'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  labels.forEach((l,i) => {
+    const a=(Math.PI*2*i/n)-Math.PI/2, r=R+26;
+    ctx.fillText(l, cx+r*Math.cos(a), cy+r*Math.sin(a));
+  });
+  brands.forEach(b => {
+    ctx.beginPath();
+    b.scores.forEach((s,i) => {
+      const a=(Math.PI*2*i/n)-Math.PI/2, r=R*s/9;
+      i===0 ? ctx.moveTo(cx+r*Math.cos(a), cy+r*Math.sin(a)) : ctx.lineTo(cx+r*Math.cos(a), cy+r*Math.sin(a));
+    });
+    ctx.closePath(); ctx.fillStyle=b.fill; ctx.fill();
+    ctx.strokeStyle=b.color; ctx.lineWidth=2; ctx.stroke();
+    b.scores.forEach((s,i) => {
+      const a=(Math.PI*2*i/n)-Math.PI/2, r=R*s/9;
+      ctx.beginPath(); ctx.arc(cx+r*Math.cos(a), cy+r*Math.sin(a), 3, 0, Math.PI*2);
+      ctx.fillStyle=b.color; ctx.fill();
+    });
+  });
+}
+const radarObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { drawRadar(); radarObs.unobserve(e.target); } });
+}, { threshold: 0.3 });
+const radarEl = document.getElementById('radar');
+if (radarEl) radarObs.observe(radarEl);
+</script>
+</body>
+</html>
